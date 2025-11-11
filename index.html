@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un mot, pour toi, jusqu'à Noël</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, #0f4c5c 0%, #1b3a4b 100%);
+            min-height: 100vh;
+            color: #f8f4e9;
+        }
+        
+        .script-font {
+            font-family: 'Dancing Script', cursive;
+        }
+        
+        .card {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(to bottom right, #f8f4e9, #f0e6d2);
+            color: #1b3a4b;
+            padding: 1.5rem;
+            flex-direction: column;
+        }
+        
+        .snowflake {
+            position: fixed;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .light-particle {
+            position: fixed;
+            background: rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .golden-underline {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .golden-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .candle-flicker {
+            animation: flicker 3s infinite alternate;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Empêche le défilement quand une carte est ouverte */
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        /* Overlay pour mobile quand une carte est ouverte */
+        .card-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 20;
+        }
+
+        /* Style spécifique pour mobile */
+        @media (max-width: 640px) {
+            .card.flipped {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotateY(180deg);
+                width: 85vw;
+                height: 85vw;
+                z-index: 30;
+            }
+            
+            .card.flipped .card-inner {
+                transform: rotateY(180deg) !important;
+            }
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Snowflakes and light particles -->
+    <div id="snowflakes"></div>
+    <div id="light-particles"></div>
+    
+    <!-- Overlay for mobile -->
+    <div id="card-overlay" class="card-overlay"></div>
+    
+    <!-- Main content -->
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-12 relative z-10">
+            <div class="flex justify-center mb-2">
+                <i class="fas fa-star text-amber-300 text-xl mr-2 floating"></i>
+                <i class="fas fa-candle-holder text-amber-200 text-xl candle-flicker"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 golden-underline">
+                <span class="text-amber-100">Un mot, pour toi, jusqu'à Noël</span>
+            </h1>
+            <p class="script-font text-xl md:text-2xl text-amber-100 mt-4">
+                24 jours pour recevoir une parole, une image, une lumière.
+            </p>
+        </header>
+        
+        <!-- Advent grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 relative z-10 pb-20">
+            <!-- Generate 24 cards -->
+            <script>
+                const messages = [
+                    "Que la paix de Dieu, qui surpasse toute intelligence, garde votre cœur et vos pensées en Jésus-Christ.",
+                    "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle.",
+                    "Je vous laisse la paix, je vous donne ma paix. Je ne vous donne pas comme le monde donne.",
+                    "L'Éternel est mon berger: je ne manquerai de rien.",
+                    "Aimez-vous les uns les autres comme je vous ai aimés.",
+                    "Réjouissez-vous toujours dans le Seigneur; je le répète, réjouissez-vous.",
+                    "Tout ce que vous faites, faites-le de bon cœur, comme pour le Seigneur et non pour des hommes.",
+                    "Ne vous inquiétez de rien, mais en toute chose faites connaître vos besoins à Dieu par des prières et des supplications, avec des actions de grâces.",
+                    "Soyez toujours joyeux. Priez sans cesse. Rendez grâces en toutes choses.",
+                    "Car je connais les projets que j'ai formés sur vous, dit l'Éternel, projets de paix et non de malheur.",
+                    "L'Éternel est proche de ceux qui ont le cœur brisé, et il sauve ceux qui ont l'esprit dans l'abattement.",
+                    "Confie-toi en l'Éternel de tout ton cœur, et ne t'appuie pas sur ta sagesse.",
+                    "Mais ceux qui se confient en l'Éternel renouvellent leur force. Ils prennent leur vol comme les aigles.",
+                    "Car je suis persuadé que ni la mort ni la vie, ni les anges ni les dominations, ni les choses présentes ni les choses à venir, ne pourra nous séparer de l'amour de Dieu.",
+                    "Heureux ceux qui procurent la paix, car ils seront appelés fils de Dieu!",
+                    "Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos.",
+                    "Je suis le chemin, la vérité, et la vie. Nul ne vient au Père que par moi.",
+                    "Ayez du sel en vous-mêmes, et soyez en paix les uns avec les autres.",
+                    "Que votre lumière luise ainsi devant les hommes, afin qu'ils voient vos bonnes œuvres, et qu'ils glorifient votre Père qui est dans les cieux.",
+                    "Heureux les artisans de paix, car ils seront appelés fils de Dieu.",
+                    "Mais cherchez premièrement le royaume et la justice de Dieu; et toutes ces choses vous seront données par-dessus.",
+                    "Au commencement était la Parole, et la Parole était avec Dieu, et la Parole était Dieu.",
+                    "Et la Parole a été faite chair, et elle a habité parmi nous, pleine de grâce et de vérité.",
+                    "Car un enfant nous est né, un fils nous est donné, et la domination reposera sur son épaule; on l'appellera Admirable, Conseiller, Dieu puissant, Père éternel, Prince de la paix."
+                ];
+                
+                const images = [
+                    "mountain", "cross", "dove", "lamb", "heart", "hands", "bread", "vine", "light", "path",
+                    "shepherd", "book", "eagle", "anchor", "olive", "field", "door", "salt", "lamp", "star",
+                    "lily", "alpha", "manger", "angel"
+                ];
+                
+                document.addEventListener('DOMContentLoaded', function() {
+                    const container = document.querySelector('.grid');
+                    const overlay = document.getElementById('card-overlay');
+                    let currentlyFlippedCard = null;
+                    
+                    for (let i = 0; i < 24; i++) {
+                        const day = i + 1;
+                        const today = new Date();
+                        const currentDay = today.getDate();
+                        const isPast = day <= currentDay;
+                        
+                        const card = document.createElement('div');
+                        card.className = `card aspect-square ${isPast ? 'cursor-pointer hover:scale-105' : 'opacity-50'}`;
+                        card.dataset.day = day;
+                        
+                        card.innerHTML = `
+                            <div class="card-inner h-full w-full">
+                                <div class="card-front bg-gradient-to-br from-teal-800 to-teal-900 flex flex-col items-center justify-center p-4">
+                                    <span class="text-4xl font-bold text-amber-200">${day}</span>
+                                    ${!isPast ? '<span class="text-xs mt-2 text-amber-100 opacity-70">Bientôt disponible</span>' : ''}
+                                </div>
+                                <div class="card-back">
+                                    <i class="fas fa-${images[i]} text-5xl mb-4 text-amber-600"></i>
+                                    <p class="text-center text-sm md:text-base mb-4">${messages[i]}</p>
+                                    <div class="flex space-x-2">
+                                        <button class="amen-btn bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-full text-xs flex items-center">
+                                            <i class="fas fa-praying-hands mr-1"></i> Amen
+                                        </button>
+                                        <button class="share-btn bg-teal-700 hover:bg-teal-800 text-white px-3 py-1 rounded-full text-xs flex items-center">
+                                            <i class="fas fa-share-alt mr-1"></i> Partager
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        if (isPast) {
+                            card.addEventListener('click', function(e) {
+                                // Ne pas retourner la carte si on clique sur un bouton
+                                if (e.target.closest('.amen-btn') || e.target.closest('.share-btn')) {
+                                    return;
+                                }
+                                
+                                // Fermer la carte précédente si une autre est ouverte
+                                if (currentlyFlippedCard && currentlyFlippedCard !== this) {
+                                    currentlyFlippedCard.classList.remove('flipped');
+                                }
+                                
+                                this.classList.toggle('flipped');
+                                
+                                // Gestion pour mobile
+                                if (window.innerWidth <= 640) {
+                                    if (this.classList.contains('flipped')) {
+                                        document.body.classList.add('no-scroll');
+                                        overlay.style.display = 'block';
+                                        currentlyFlippedCard = this;
+                                    } else {
+                                        document.body.classList.remove('no-scroll');
+                                        overlay.style.display = 'none';
+                                        currentlyFlippedCard = null;
+                                    }
+                                } else {
+                                    currentlyFlippedCard = this.classList.contains('flipped') ? this : null;
+                                }
+                            });
+                        }
+                        
+                        container.appendChild(card);
+                    }
+                    
+                    // Fermer la carte quand on clique sur l'overlay (mobile)
+                    overlay.addEventListener('click', function() {
+                        if (currentlyFlippedCard) {
+                            currentlyFlippedCard.classList.remove('flipped');
+                            document.body.classList.remove('no-scroll');
+                            overlay.style.display = 'none';
+                            currentlyFlippedCard = null;
+                        }
+                    });
+                    
+                    // Create snowflakes
+                    createSnowflakes();
+                    createLightParticles();
+                });
+                
+                function createSnowflakes() {
+                    const container = document.getElementById('snowflakes');
+                    const snowflakeCount = 30;
+                    
+                    for (let i = 0; i < snowflakeCount; i++) {
+                        const snowflake = document.createElement('div');
+                        snowflake.className = 'snowflake';
+                        
+                        const size = Math.random() * 5 + 2;
+                        const posX = Math.random() * window.innerWidth;
+                        const delay = Math.random() * 5;
+                        const duration = Math.random() * 10 + 10;
+                        const opacity = Math.random() * 0.7 + 0.3;
+                        
+                        snowflake.style.width = `${size}px`;
+                        snowflake.style.height = `${size}px`;
+                        snowflake.style.left = `${posX}px`;
+                        snowflake.style.top = '-10px';
+                        snowflake.style.opacity = opacity;
+                        snowflake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
+                        
+                        container.appendChild(snowflake);
+                    }
+                    
+                    // Add fall animation
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        @keyframes fall {
+                            to {
+                                transform: translateY(${window.innerHeight + 10}px);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                function createLightParticles() {
+                    const container = document.getElementById('light-particles');
+                    const particleCount = 15;
+                    
+                    for (let i = 0; i < particleCount; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'light-particle';
+                        
+                        const size = Math.random() * 8 + 4;
+                        const posX = Math.random() * window.innerWidth;
+                        const posY = Math.random() * window.innerHeight;
+                        const duration = Math.random() * 20 + 10;
+                        const delay = Math.random() * 5;
+                        
+                        particle.style.width = `${size}px`;
+                        particle.style.height = `${size}px`;
+                        particle.style.left = `${posX}px`;
+                        particle.style.top = `${posY}px`;
+                        particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                        
+                        container.appendChild(particle);
+                    }
+                }
+            </script>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="text-center py-8 text-sm text-amber-100 opacity-70 relative z-10">
+        <p>Un mot, pour toi, jusqu'à Noël © 2023</p>
+    </footer>
+</body>
+</html>
